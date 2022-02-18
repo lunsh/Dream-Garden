@@ -17,9 +17,4 @@ public class Controller : MonoBehaviour
     {
         heartsText.text = data.hearts.ToString();
     }
-
-    public void GenerateHearts()
-    {
-        data.hearts++;
-    }
 }
