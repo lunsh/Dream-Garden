@@ -5,10 +5,11 @@ using UnityEngine.UI;
 
 public class Plant : MonoBehaviour
 {
+    public int plantID;
     public bool active;
     public Image sprout;
     public int DelayAmount = 1; // 1 second for timer
-    protected float Timer;
+    public float Timer;
 
     public void Start()
     {
@@ -18,7 +19,7 @@ public class Plant : MonoBehaviour
     public void sowSeed()
     {
         // no seed yet, plant the seed
-        if (! active)
+        if (!active)
         {
             active = true;
             print("sowing seed");
@@ -26,16 +27,6 @@ public class Plant : MonoBehaviour
             var tempColor = sprout.color;
             tempColor.a = 1f;
             sprout.color = tempColor;
-        }
-    }
-
-    private void Update()
-    {
-        Timer += Time.deltaTime;
-
-        if ( Timer >= DelayAmount)
-        {
-            Timer = 0f;
         }
     }
 }
