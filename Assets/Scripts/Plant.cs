@@ -13,7 +13,7 @@ public class Plant : MonoBehaviour
 
     public void Start()
     {
-        active = false;
+        active = PlayerPrefs.GetInt("plant" + plantID + "active", 0) == 0 ? false : true;
     }
 
     public void sowSeed()
@@ -22,6 +22,7 @@ public class Plant : MonoBehaviour
         if (!active)
         {
             active = true;
+            PlayerPrefs.SetInt("plant" + plantID + "active", 1);
             print("sowing seed");
             sprout.sprite = Resources.Load<Sprite>("violafern-baby");
             var tempColor = sprout.color;

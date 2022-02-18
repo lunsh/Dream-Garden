@@ -16,9 +16,21 @@ public class Controller : MonoBehaviour
     {
         data = new Data();
         // Save data handling
+        //PlayerPrefs.DeleteAll();
         data.hearts = PlayerPrefs.GetInt("totalhearts", 0);
-        //string tempIDs = PlayerPrefs.GetString("plantIDs", null);
+        string tempIDs = PlayerPrefs.GetString("plantIDs", "noIDs");
+        if ( tempIDs == "noIDs" )
+        {
+            // create a new plant
+            data.plantIDs[0] = 0;
+            PlayerPrefs.SetString("plantIDs", string.Join(",", data.plantIDs));
+        }
+        else
+        {
+            data.plantIDs = Array.ConvertAll(tempIDs.Split(','), int.Parse);
+        }
 
+        print(PlayerPrefs.GetInt("plant0active", 0));
 
         for ( int i = 0; i < data.plantIDs.Length; i++ )
         {
