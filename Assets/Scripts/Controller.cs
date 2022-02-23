@@ -9,12 +9,16 @@ public class Controller : MonoBehaviour
     public Data data;
     public Plant PlantPrefab;
     [SerializeField] private TMP_Text heartsText;
+    [SerializeField] private UIInventory uiInventory;
+    public Inventory inventory;
 
     public Transform plantsPanel;
 
     private void Start()
     {
         data = new Data();
+        inventory = new Inventory();
+        uiInventory.SetInventory(inventory);
         // Save data handling
         //PlayerPrefs.DeleteAll();
         data.hearts = PlayerPrefs.GetInt("totalhearts", 0);
@@ -29,8 +33,6 @@ public class Controller : MonoBehaviour
         {
             data.plantIDs = Array.ConvertAll(tempIDs.Split(','), int.Parse);
         }
-
-        print(PlayerPrefs.GetInt("plant0active", 0));
 
         for ( int i = 0; i < data.plantIDs.Length; i++ )
         {

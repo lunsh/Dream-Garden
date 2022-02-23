@@ -10,6 +10,9 @@ public class Plant : MonoBehaviour
     public Image sprout;
     public int DelayAmount = 1; // 1 second for timer
     public float Timer;
+    public string babySprite;
+    public string teenageSprite;
+    public string adultSprite;
 
     public void Start()
     {
