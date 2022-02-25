@@ -3,13 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Linq;
 
 public class Controller : MonoBehaviour
 {
     public Data data;
     public Plant PlantPrefab;
     [SerializeField] private TMP_Text heartsText;
-    [SerializeField] private UIInventory uiInventory;
+    [SerializeField] private GameObject uiInventory;
     public Inventory inventory;
 
     public Transform plantsPanel;
@@ -17,8 +18,7 @@ public class Controller : MonoBehaviour
     private void Start()
     {
         data = new Data();
-        inventory = new Inventory();
-        uiInventory.SetInventory(inventory);
+        data.inventory.AddItem(data.seedsCommon.Where(Seed => Seed.seedType == Seed.SeedType.ViolaFern).SingleOrDefault());
         // Save data handling
         //PlayerPrefs.DeleteAll();
         data.hearts = PlayerPrefs.GetInt("totalhearts", 0);

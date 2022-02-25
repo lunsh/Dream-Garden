@@ -10,8 +10,13 @@ public class Inventory
     {
         seedList = new List<Seed>();
 
-        AddItem(new Seed { seedType = Seed.SeedType.ViolaFern, amount = 1 });
-        Debug.Log(seedList.Count);
+        //AddItem(new Seed { seedType = Seed.SeedType.ViolaFern, amount = 1 });
+        //Debug.Log(seedList.Count);
+    }
+
+    public int GetCount()
+    {
+        return seedList.Count;
     }
 
     public void AddItem(Seed seed)
