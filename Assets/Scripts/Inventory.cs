@@ -23,4 +23,20 @@ public class Inventory
     {
         seedList.Add(seed);
     }
+
+    public Seed GetItem(int slot)
+    {
+        return seedList[slot];
+    }
+
+    public void RemoveItem(Seed seed)
+    {
+        for (int i = 0; i < seedList.Count; i++)
+        {
+            if (seedList[i].seedType == seed.seedType)
+            {
+                //print("found it");
+            }
+        }
+    }
 }

@@ -10,6 +10,8 @@ public class MenuUI : MonoBehaviour
     [SerializeField] private GameObject noSeedText;
     [SerializeField] private Transform inventoryContent;
     [SerializeField] private Transform itemPrefab;
+    [SerializeField] private GameObject inventoryUI;
+    [SerializeField] private GameObject uiIntro;
 
     public void Start()
     {
@@ -21,14 +23,36 @@ public class MenuUI : MonoBehaviour
     {
         Inventory menuInventory = controller.data.inventory;
 
-        if (menuInventory.GetCount() > 0)
-        {
-            // hide the "no seeds yet" text
-            noSeedText.SetActive(false);
-            for ( int i = 0; i < menuInventory.GetCount(); i++ )
+        if (inventoryUI.activeSelf)
+        { // set to inactive and hide
+            inventoryUI.SetActive(false);
+            foreach (Transform child in inventoryContent.transform)
             {
-                Instantiate(itemPrefab, inventoryContent);
+                GameObject.Destroy(child.gameObject);
+            }
+        } else
+        { // set to active and show
+            inventoryUI.SetActive(true);
+            if (menuInventory.GetCount() > 0)
+            {
+                // hide the "no seeds yet" text
+                noSeedText.SetActive(false);
+                for (int i = 0; i < menuInventory.GetCount(); i++)
+                {
+                    Seed seedData = controller.data.inventory.GetItem(i);
+                    Transform prefab = Instantiate(itemPrefab, inventoryContent);
+
+                    Transform itemImage = prefab.transform.GetChild(0);
+                    Transform itemText = prefab.transform.GetChild(1);
+
+                    itemText.GetComponent<TMPro.TextMeshProUGUI>().text = seedData.preDescription;
+                }
             }
         }
+    }
+
+    public void CloseTutorial()
+    {
+        uiIntro.SetActive(false);
     }
 }

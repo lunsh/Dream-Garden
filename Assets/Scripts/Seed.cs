@@ -21,11 +21,14 @@ public class Seed
 
     public SeedType seedType;
     public int amount;
+    public bool discovered;
+    public string preDescription;
+    public string textureName;
     /*public float timeToAccumulateHeart;
     public float timeToWilt1;
     public float timeToWilt2;
     public float timeToGrow1;
     public float timeToGrow2;
     public string description;
-    public string textureName;*/
+    */
 }
