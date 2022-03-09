@@ -11,7 +11,7 @@ public class Plant : MonoBehaviour
     public int plantID;
     public bool active;
     public Image sprout;
-    public int DelayAmount = 1; // 1 second for timer
+    public int HeartTimer = 1; // 1 second for timer
     public float Timer;
     private int count;
     public float GrowthTimer;
@@ -91,6 +91,7 @@ public class Plant : MonoBehaviour
                 Transform itemText = prefab.transform.GetChild(0).GetChild(1);
 
                 itemText.GetComponent<TMPro.TextMeshProUGUI>().text = seedData.preDescription;
+                itemImage.GetComponent<Image>().sprite = Resources.Load<Sprite>(seedData.textureName + "-seed");
             }
         }
     }
@@ -104,6 +105,7 @@ public class Plant : MonoBehaviour
     {
         uiSeedSelect.SetActive(false);
         // remove seed from inventory
+        controller.data.inventory.RemoveItem(seedData);
         active = true;
         PlayerPrefs.SetInt("plant" + plantID + "active", 1);
         sprout.sprite = Resources.Load<Sprite>(seedData.textureName + "-baby");

@@ -26,7 +26,7 @@ public class Data
             new Seed { seedType = Seed.SeedType.ViolaFern,
                        amount = 1,
                        discovered = false,
-                       preDescription = "Small pink seed",
+                       preDescription = "Large pink seed",
                        textureName = "violafern" },
             new Seed { seedType = Seed.SeedType.ShearPalm, 
                        amount = 1,

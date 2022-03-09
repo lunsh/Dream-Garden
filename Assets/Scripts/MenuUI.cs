@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MenuUI : MonoBehaviour
 {
@@ -46,6 +47,7 @@ public class MenuUI : MonoBehaviour
                     Transform itemText = prefab.transform.GetChild(1);
 
                     itemText.GetComponent<TMPro.TextMeshProUGUI>().text = seedData.preDescription;
+                    itemImage.GetComponent<Image>().sprite = Resources.Load<Sprite>(seedData.textureName + "-seed");
                 }
             }
         }

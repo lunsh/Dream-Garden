@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using System.Linq;
 
@@ -69,7 +70,7 @@ public class Controller : MonoBehaviour
             if (data.plants[i] != null && data.plants[i].active == true)
             {
                 data.plants[i].Timer += Time.deltaTime;
-                if (data.plants[i].Timer >= data.plants[i].DelayAmount)
+                if (data.plants[i].Timer >= data.plants[i].HeartTimer)
                 {
                     data.plants[i].Timer = 0f;
                     data.hearts += 1;
@@ -113,6 +114,7 @@ public class Controller : MonoBehaviour
             Transform itemImage = seedStarterTemplate.transform.GetChild(0);
             Transform itemText = seedStarterTemplate.transform.GetChild(1);
             itemText.GetComponent<TMPro.TextMeshProUGUI>().text = data.seedsCommon[seedNum].preDescription;
+            itemImage.GetComponent<Image>().sprite = Resources.Load<Sprite>(data.seedsCommon[seedNum].textureName + "-seed");
             count++;
             seedNum = seed2Num;
         }
