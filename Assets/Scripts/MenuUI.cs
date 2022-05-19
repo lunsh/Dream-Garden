@@ -13,6 +13,7 @@ public class MenuUI : MonoBehaviour
     [SerializeField] private Transform itemPrefab;
     [SerializeField] private GameObject inventoryUI;
     [SerializeField] private GameObject uiIntro;
+    [SerializeField] private GameObject shopUI;
 
     public void Start()
     {
@@ -51,6 +52,22 @@ public class MenuUI : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void ToggleShop()
+    {
+        if ( shopUI.activeSelf )
+        {
+            shopUI.SetActive(false);
+        } else
+        {
+            shopUI.SetActive(true);
+        }
+    }
+
+    public void CloseShop()
+    {
+        shopUI.SetActive(false);
     }
 
     public void CloseTutorial()
