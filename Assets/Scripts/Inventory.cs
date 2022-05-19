@@ -29,6 +29,12 @@ public class Inventory
         return seedList[slot];
     }
 
+    public Seed SetAmount(int slot, int value)
+    {
+        seedList[slot].amount = value;
+        return seedList[slot];
+    }
+
     public void RemoveItem(Seed seed)
     {
         for (int i = 0; i < seedList.Count; i++)
@@ -45,5 +51,15 @@ public class Inventory
                 }
             }
         }
+    }
+
+    public override string ToString()
+    {
+        string[] buildArray = new string[seedList.Count];
+        for (int i = 0; i < seedList.Count; i++)
+        {
+            buildArray[i] = seedList[i].seedType.ToString();
+        }
+        return string.Join(",", buildArray);
     }
 }

@@ -29,8 +29,6 @@ public class Plant : MonoBehaviour
     {
         controllerObj = GameObject.Find("/Scripts/Controller");
         controller = controllerObj.GetComponent<Controller>();
-        active = PlayerPrefs.GetInt("plant" + plantID + "active", 0) == 0 ? false : true;
-        activeSeed = null;
         stage = -1;
     }
 
@@ -79,6 +77,11 @@ public class Plant : MonoBehaviour
         {
             // hide the "no seeds yet" text
             uiNoSeedText.SetActive(false);
+
+            foreach (Transform child in uiInventoryContent.transform)
+            {
+                GameObject.Destroy(child.gameObject);
+            }
             for (int i = 0; i < menuInventory.GetCount(); i++)
             {
                 Seed seedData = controller.data.inventory.GetItem(i);
@@ -107,13 +110,14 @@ public class Plant : MonoBehaviour
         // remove seed from inventory
         controller.data.inventory.RemoveItem(seedData);
         active = true;
-        PlayerPrefs.SetInt("plant" + plantID + "active", 1);
+        //PlayerPrefs.SetInt("plant" + plantID + "active", 1);
         sprout.sprite = Resources.Load<Sprite>(seedData.textureName + "-baby");
         var tempColor = sprout.color;
         tempColor.a = 1f;
         sprout.color = tempColor;
         activeSeed = seedData;
         stage = 0; // baby
+        //PlayerPrefs.SetString("plant" + plantID + "seed", seedData.seedType.ToString());
         if ( controller.data.plants[plantID] == null ) // is this statement necessary???
         {
             controller.data.plants[plantID] = this;

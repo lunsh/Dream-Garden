@@ -16,50 +16,27 @@ public class Controller : MonoBehaviour
     [SerializeField] private GameObject uiSeedStarters;
     public Inventory inventory;
 
+    bool isPaused = false;
+
     public Transform plantsPanel;
 
     private void Start()
     {
         data = new Data();
         // Save data handling
-        PlayerPrefs.DeleteAll();
+        //PlayerPrefs.DeleteAll();
         if (! PlayerPrefs.HasKey("saveData")) // no save data, run tutorial
         {
             Tutorial();
-            PlayerPrefs.SetInt("saveData", 1);
+            data.plantIDs[0] = 0; 
+            Plant tempPlant = Instantiate(PlantPrefab, plantsPanel);
+            tempPlant.plantID = 0;
+            tempPlant.active = false;
+            tempPlant.activeSeed = null;
+            data.plants.Add(tempPlant);
         } else
         {
-            // inventory save data: todo: add other seed types (rare, uncommon, etc)
-            string tempInventoryIDs = PlayerPrefs.GetString("inventoryIDs", "noIDs");
-            if (tempInventoryIDs != "noIDs")
-            {
-                int[] tempInventory = Array.ConvertAll(tempInventoryIDs.Split(','), int.Parse);
-                for ( int i = 0; i < tempInventory.Length; i++ )
-                {
-                    data.inventory.AddItem(data.seedsCommon[tempInventory[i]]);
-                }
-            }
-        }
-        data.hearts = PlayerPrefs.GetInt("totalhearts", 0);
-        string tempIDs = PlayerPrefs.GetString("plantIDs", "noIDs");
-        if ( tempIDs == "noIDs" )
-        {
-            // create a new plant
-            data.plantIDs[0] = 0;
-            PlayerPrefs.SetString("plantIDs", string.Join(",", data.plantIDs));
-        }
-        else
-        {
-            data.plantIDs = Array.ConvertAll(tempIDs.Split(','), int.Parse);
-        }
-
-        for ( int i = 0; i < data.plantIDs.Length; i++ )
-        {
-            if ( data.plantIDs[i] != -1 ) { 
-                Plant tempPlant = Instantiate(PlantPrefab, plantsPanel);
-                tempPlant.plantID = i;
-                data.plants.Add(tempPlant);
-            }
+            loadSave();
         }
     }
 
@@ -78,7 +55,12 @@ public class Controller : MonoBehaviour
             }
         }
         heartsText.text = data.hearts.ToString();
-        PlayerPrefs.SetInt("totalhearts", data.hearts);
+
+        if ( isPaused )
+        {
+            //need to save hearts every time
+            PlayerPrefs.SetInt("totalhearts", data.hearts);
+        }
 
         if ( Input.GetKeyDown(KeyCode.R))
         {
@@ -105,8 +87,6 @@ public class Controller : MonoBehaviour
         data.inventory.AddItem(data.seedsCommon[seed1Num]);
         data.inventory.AddItem(data.seedsCommon[seed2Num]);
 
-        PlayerPrefs.SetString("inventoryIDs", seed1Num + "," + seed2Num);
-        PlayerPrefs.SetString("inventoryCounts", "1, 1");
         int count = 0;
         int seedNum = seed1Num;
         foreach (Transform seedStarterTemplate in uiSeedStarters.transform)
@@ -117,6 +97,105 @@ public class Controller : MonoBehaviour
             itemImage.GetComponent<Image>().sprite = Resources.Load<Sprite>(data.seedsCommon[seedNum].textureName + "-seed");
             count++;
             seedNum = seed2Num;
+        }
+    }
+
+    void OnApplicationFocus(bool hasFocus)
+    {
+        isPaused = !hasFocus;
+        if ( isPaused == true )
+        {
+            saveData();
+        }
+    }
+
+    void OnApplicationPause(bool pauseStatus)
+    {
+        isPaused = pauseStatus;
+    }
+
+    private void saveData()
+    {
+        print("saving");
+        PlayerPrefs.SetInt("saveData", 1);
+        if (data.plantIDs != null)
+        {
+            PlayerPrefs.SetString("plantIDs", string.Join(",", data.plantIDs));
+        }
+        // save plants
+
+        print(data.plants[0]);
+        for (int i = 0; i < data.plantIDs.Length; i++)
+        {
+            if (data.plantIDs[i] != -1 && data.plants[i] != null)
+            {
+                print(data.plants[i].activeSeed);
+                string plantSeedName = data.plants[i].activeSeed.seedType.ToString();
+                PlayerPrefs.SetString("plant" + i + "seed", plantSeedName);
+                string plantSeedRarity = data.plants[i].activeSeed.rarity;
+                PlayerPrefs.SetString("plant" + i + "rarity", plantSeedRarity);
+            }
+        }
+        // save inventory
+        PlayerPrefs.SetString("inventoryIDs", data.inventory.ToString());
+
+        int[] inventoryCounts = new int[data.inventory.GetCount()];
+        for (int i = 0; i < data.inventory.GetCount(); i++ )
+        {
+            inventoryCounts[i] = data.inventory.GetItem(i).amount;
+        }
+        PlayerPrefs.SetString("inventoryCounts", string.Join(",", inventoryCounts));
+    }
+
+    private void loadSave()
+    {
+        string tempInventoryIDs = PlayerPrefs.GetString("inventoryIDs", "noIDs");
+        if (tempInventoryIDs != "noIDs")
+        {
+            string[] tempInventory = tempInventoryIDs.Split(',');
+            for (int i = 0; i < tempInventory.Length; i++)
+            {
+                data.inventory.AddItem(data.findSeed(tempInventory[i]));
+            }
+        }
+        // inventory amounts
+        string inventoryValString = PlayerPrefs.GetString("inventoryAmounts", "noAmounts");
+        if (inventoryValString != "noAmounts")
+        {
+            int[] inventoryVals = Array.ConvertAll(inventoryValString.Split(','), int.Parse);
+            for ( int i = 0; i < data.inventory.GetCount(); i++ )
+            {
+                data.inventory.SetAmount(i, inventoryVals[i]);
+            }
+        }
+        data.hearts = PlayerPrefs.GetInt("totalhearts", 0);
+        string tempIDs = PlayerPrefs.GetString("plantIDs", "noIDs");
+        if (tempIDs != "noIDs") { 
+            data.plantIDs = Array.ConvertAll(tempIDs.Split(','), int.Parse);
+            /**/
+            // attempt to get seed data
+            for (int i = 0; i < data.plantIDs.Length; i++)
+            {
+                if (data.plantIDs[i] != -1)
+                {
+                    Plant tempPlant = Instantiate(PlantPrefab, plantsPanel);
+                    tempPlant.plantID = i;
+
+                    string tempSeedData = PlayerPrefs.GetString("plant" + i + "seed", "noSeed");
+                    if (tempSeedData != "noSeed")
+                    { // the plant pot has a plant in it
+                        Seed foundSeed = data.findSeed(tempSeedData);
+                        tempPlant.active = true;
+                        tempPlant.sprout.sprite = Resources.Load<Sprite>(foundSeed.textureName + "-baby");
+                        var tempColor = tempPlant.sprout.color;
+                        tempColor.a = 1f;
+                        tempPlant.sprout.color = tempColor;
+                        tempPlant.activeSeed = data.findSeed(tempSeedData);
+                        tempPlant.stage = 0; // baby
+                    }
+                    data.plants[i] = tempPlant;
+                }
+            }
         }
     }
 }

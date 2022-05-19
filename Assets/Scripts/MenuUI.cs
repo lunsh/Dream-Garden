@@ -27,13 +27,13 @@ public class MenuUI : MonoBehaviour
         if (inventoryUI.activeSelf)
         { // set to inactive and hide
             inventoryUI.SetActive(false);
+        } else
+        { // set to active and show
+            inventoryUI.SetActive(true);
             foreach (Transform child in inventoryContent.transform)
             {
                 GameObject.Destroy(child.gameObject);
             }
-        } else
-        { // set to active and show
-            inventoryUI.SetActive(true);
             if (menuInventory.GetCount() > 0)
             {
                 // hide the "no seeds yet" text

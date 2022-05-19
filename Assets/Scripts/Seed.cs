@@ -22,6 +22,7 @@ public class Seed
     public SeedType seedType;
     public int amount;
     public bool discovered;
+    public string rarity;
     public string preDescription;
     public string textureName;
     /*public float timeToAccumulateHeart;
