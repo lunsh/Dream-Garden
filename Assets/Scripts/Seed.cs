@@ -17,6 +17,20 @@ public class Seed
         VioletSugarplum,
         Queenstail,
         GrandSidewinder,
+        Webweaver,
+        WaxyDiamondback,
+        SpindlesofHeaven,
+        JillintheBush,
+        BloodClover,
+        PaleWinterberry,
+        SpinyHellebore,
+        Goldenvine,
+        TitianCitrus,
+        ChillySpindleweed,
+        AshenThyme,
+        MilkySilkwater,
+        Stonewart,
+        Mirrorwood
     }
 
     public SeedType seedType;

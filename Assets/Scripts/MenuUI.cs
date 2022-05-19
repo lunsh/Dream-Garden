@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class MenuUI : MonoBehaviour
 {
@@ -13,12 +14,39 @@ public class MenuUI : MonoBehaviour
     [SerializeField] private Transform itemPrefab;
     [SerializeField] private GameObject inventoryUI;
     [SerializeField] private GameObject uiIntro;
+
+    /* shop */
     [SerializeField] private GameObject shopUI;
+    [SerializeField] private GameObject notEnoughSeed;
+    [SerializeField] private GameObject notEnoughPot;
+    [SerializeField] private TMP_Text seedPrice;
+    [SerializeField] private TMP_Text potPrice;
+    [SerializeField] private GameObject seedBuySuccess;
 
     public void Start()
     {
         controllerObj = GameObject.Find("/Scripts/Controller");
         controller = controllerObj.GetComponent<Controller>();
+    }
+
+    public void Update()
+    {
+        if (controller.data.hearts >= controller.data.initialSeedCost)
+        {
+            notEnoughSeed.SetActive(false);
+        }
+        else
+        {
+            notEnoughSeed.SetActive(true);
+        }
+        if (controller.data.hearts >= controller.data.initialPotCost)
+        {
+            notEnoughPot.SetActive(false);
+        }
+        else
+        {
+            notEnoughPot.SetActive(true);
+        }
     }
 
     public void ToggleInventory()
@@ -62,12 +90,33 @@ public class MenuUI : MonoBehaviour
         } else
         {
             shopUI.SetActive(true);
+            seedPrice.text = (controller.data.initialSeedCost + (controller.data.seedIncrease * controller.data.numSeedsBought)).ToString();
+            potPrice.text = (controller.data.initialPotCost + controller.data.initialPotCost * controller.data.numPlantPotsBought).ToString();
         }
     }
 
     public void CloseShop()
     {
         shopUI.SetActive(false);
+    }
+
+    public void BuySeed()
+    {
+        // double check they can afford it
+        if (controller.data.hearts >= controller.data.initialSeedCost)
+        {
+            print("buying seeds");
+            shopUI.SetActive(false);
+            seedBuySuccess.SetActive(true);
+
+            // pick a random seed
+
+        }
+    }
+
+    public void DoneSeed()
+    {
+        seedBuySuccess.SetActive(false);
     }
 
     public void CloseTutorial()

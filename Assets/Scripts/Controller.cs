@@ -124,16 +124,15 @@ public class Controller : MonoBehaviour
         }
         // save plants
 
-        print(data.plants[0]);
         for (int i = 0; i < data.plantIDs.Length; i++)
         {
             if (data.plantIDs[i] != -1 && data.plants[i] != null)
             {
-                print(data.plants[i].activeSeed);
                 string plantSeedName = data.plants[i].activeSeed.seedType.ToString();
                 PlayerPrefs.SetString("plant" + i + "seed", plantSeedName);
                 string plantSeedRarity = data.plants[i].activeSeed.rarity;
                 PlayerPrefs.SetString("plant" + i + "rarity", plantSeedRarity);
+                PlayerPrefs.SetInt("plant" + i + "stage", data.plants[i].stage);
             }
         }
         // save inventory
@@ -182,6 +181,7 @@ public class Controller : MonoBehaviour
                     tempPlant.plantID = i;
 
                     string tempSeedData = PlayerPrefs.GetString("plant" + i + "seed", "noSeed");
+                    int tempSeedStage = PlayerPrefs.GetInt("playt" + i + "stage", 0);
                     if (tempSeedData != "noSeed")
                     { // the plant pot has a plant in it
                         Seed foundSeed = data.findSeed(tempSeedData);
@@ -191,7 +191,7 @@ public class Controller : MonoBehaviour
                         tempColor.a = 1f;
                         tempPlant.sprout.color = tempColor;
                         tempPlant.activeSeed = data.findSeed(tempSeedData);
-                        tempPlant.stage = 0; // baby
+                        tempPlant.stage = tempSeedStage;
                     }
                     data.plants[i] = tempPlant;
                 }
