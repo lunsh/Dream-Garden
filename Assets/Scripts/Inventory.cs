@@ -21,7 +21,22 @@ public class Inventory
 
     public void AddItem(Seed seed)
     {
-        seedList.Add(seed);
+        // first, find the seed
+        int seedFound = -1;
+        for (int i = 0; i < seedList.Count; i++)
+        {
+            if (seedList[i].seedType == seed.seedType)
+            {
+                seedFound = i;
+            }
+        }
+        if ( seedFound != -1 ) // found the seed
+        {
+            seedList[seedFound].amount++;
+        } else
+        {
+            seedList.Add(seed);
+        }
     }
 
     public Seed GetItem(int slot)

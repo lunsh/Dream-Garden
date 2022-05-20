@@ -33,6 +33,7 @@ public class Controller : MonoBehaviour
             tempPlant.plantID = 0;
             tempPlant.active = false;
             tempPlant.activeSeed = null;
+            tempPlant.stage = -1;
             data.plants.Add(tempPlant);
         } else
         {
@@ -51,6 +52,9 @@ public class Controller : MonoBehaviour
                 {
                     data.plants[i].Timer = 0f;
                     data.hearts += 1;
+
+                    Transform prefab = Instantiate(data.plants[i].heartAnimation, data.plants[i].animationHolder);
+                    StartCoroutine(destroyHeart(prefab));
                 }
             }
         }
@@ -66,6 +70,13 @@ public class Controller : MonoBehaviour
         {
             PlayerPrefs.DeleteAll();
         }
+    }
+
+    IEnumerator destroyHeart(Transform heartObj)
+    {
+        yield return new WaitForSeconds(1.0f);
+        // load scene
+        GameObject.Destroy(heartObj.gameObject);
     }
 
     private void Tutorial()
@@ -126,7 +137,7 @@ public class Controller : MonoBehaviour
 
         for (int i = 0; i < data.plantIDs.Length; i++)
         {
-            if (data.plantIDs[i] != -1 && data.plants[i] != null)
+            if (data.plantIDs[i] != -1 && data.plants[i] != null && data.plants[i].activeSeed != null)
             {
                 string plantSeedName = data.plants[i].activeSeed.seedType.ToString();
                 PlayerPrefs.SetString("plant" + i + "seed", plantSeedName);
@@ -144,6 +155,8 @@ public class Controller : MonoBehaviour
             inventoryCounts[i] = data.inventory.GetItem(i).amount;
         }
         PlayerPrefs.SetString("inventoryCounts", string.Join(",", inventoryCounts));
+        PlayerPrefs.SetInt("numSeedsBought", data.numSeedsBought);
+        PlayerPrefs.SetInt("numPlantPotsBought", data.numPlantPotsBought);
     }
 
     private void loadSave()
@@ -158,7 +171,7 @@ public class Controller : MonoBehaviour
             }
         }
         // inventory amounts
-        string inventoryValString = PlayerPrefs.GetString("inventoryAmounts", "noAmounts");
+        string inventoryValString = PlayerPrefs.GetString("inventoryCounts", "noAmounts");
         if (inventoryValString != "noAmounts")
         {
             int[] inventoryVals = Array.ConvertAll(inventoryValString.Split(','), int.Parse);
@@ -167,7 +180,11 @@ public class Controller : MonoBehaviour
                 data.inventory.SetAmount(i, inventoryVals[i]);
             }
         }
+        data.numSeedsBought = PlayerPrefs.GetInt("numSeedsBought", 0);
+        data.numPlantPotsBought = PlayerPrefs.GetInt("numPlantPotsBought", 0);
+        // hearts
         data.hearts = PlayerPrefs.GetInt("totalhearts", 0);
+        // plants
         string tempIDs = PlayerPrefs.GetString("plantIDs", "noIDs");
         if (tempIDs != "noIDs") { 
             data.plantIDs = Array.ConvertAll(tempIDs.Split(','), int.Parse);
@@ -181,19 +198,30 @@ public class Controller : MonoBehaviour
                     tempPlant.plantID = i;
 
                     string tempSeedData = PlayerPrefs.GetString("plant" + i + "seed", "noSeed");
-                    int tempSeedStage = PlayerPrefs.GetInt("playt" + i + "stage", 0);
+                    int tempSeedStage = PlayerPrefs.GetInt("plant" + i + "stage", -1);
+                    tempPlant.stage = tempSeedStage;
+                    tempPlant.active = false;
                     if (tempSeedData != "noSeed")
                     { // the plant pot has a plant in it
                         Seed foundSeed = data.findSeed(tempSeedData);
                         tempPlant.active = true;
-                        tempPlant.sprout.sprite = Resources.Load<Sprite>(foundSeed.textureName + "-baby");
+                        if ( tempSeedStage == -1 || tempSeedStage == 0 )
+                        {
+                            tempPlant.sprout.sprite = Resources.Load<Sprite>(foundSeed.textureName + "-baby");
+                        } else if ( tempSeedStage == 1 )
+                        {
+                            tempPlant.sprout.sprite = Resources.Load<Sprite>(foundSeed.textureName + "-teenager");
+                        } else
+                        {
+                            tempPlant.sprout.sprite = Resources.Load<Sprite>(foundSeed.textureName + "-adult");
+                        }
                         var tempColor = tempPlant.sprout.color;
                         tempColor.a = 1f;
                         tempPlant.sprout.color = tempColor;
                         tempPlant.activeSeed = data.findSeed(tempSeedData);
-                        tempPlant.stage = tempSeedStage;
                     }
                     data.plants[i] = tempPlant;
+                    data.plants[i].stage = tempSeedStage;
                 }
             }
         }

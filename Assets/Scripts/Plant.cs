@@ -11,7 +11,7 @@ public class Plant : MonoBehaviour
     public int plantID;
     public bool active;
     public Image sprout;
-    public int HeartTimer = 1; // 1 second for timer
+    public int HeartTimer;
     public float Timer;
     private int count;
     public float GrowthTimer;
@@ -24,12 +24,14 @@ public class Plant : MonoBehaviour
     [SerializeField] private GameObject uiNoSeedText;
     [SerializeField] private Transform uiInventoryContent;
     [SerializeField] private Transform seedButtonPrefab;
+    [SerializeField] public Transform animationHolder;
+    [SerializeField] public Transform heartAnimation;
 
     public void Start()
     {
         controllerObj = GameObject.Find("/Scripts/Controller");
         controller = controllerObj.GetComponent<Controller>();
-        stage = -1;
+        HeartTimer = 1;
     }
 
     public void Update()
