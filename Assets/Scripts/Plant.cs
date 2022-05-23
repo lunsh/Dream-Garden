@@ -31,17 +31,17 @@ public class Plant : MonoBehaviour
     {
         controllerObj = GameObject.Find("/Scripts/Controller");
         controller = controllerObj.GetComponent<Controller>();
-        HeartTimer = 1;
+        HeartTimer = 15;
     }
 
     public void Update()
     {
         if ( stage == 0 )
         {
-            growToTeen();
+            growToTeen(activeSeed.timeToGrow1);
         } else if ( stage == 1 )
         {
-            growToAdult();
+            growToAdult(activeSeed.timeToGrow2);
         }
     }
 

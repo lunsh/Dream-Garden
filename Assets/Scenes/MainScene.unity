@@ -682,7 +682,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.100997925}
+  m_AnchoredPosition: {x: 0, y: 0.10095215}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &546354451
@@ -1049,7 +1049,7 @@ GameObject:
   - component: {fileID: 931606655}
   - component: {fileID: 931606654}
   m_Layer: 5
-  m_Name: Text
+  m_Name: PlayTextShadow
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2135,6 +2135,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   settingsMenu: {fileID: 792813514}
   creditsMenu: {fileID: 2063331087}
+  playText: {fileID: 1718167259}
+  playTextShadow: {fileID: 931606654}
   transition: {fileID: 203111227}
   musicTransition: {fileID: 1889838092}
   transitionTime: 1
@@ -2472,7 +2474,7 @@ GameObject:
   - component: {fileID: 1718167260}
   - component: {fileID: 1718167259}
   m_Layer: 5
-  m_Name: Text (1)
+  m_Name: PlayText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2921,8 +2923,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -29.2, y: -5.399994}
-  m_SizeDelta: {x: 133, y: -9.022713}
+  m_AnchoredPosition: {x: -31.756609, y: -7.3029785}
+  m_SizeDelta: {x: 138.11322, y: -5.21679}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1969625991
 MonoBehaviour:

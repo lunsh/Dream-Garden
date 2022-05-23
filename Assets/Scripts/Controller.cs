@@ -11,9 +11,11 @@ public class Controller : MonoBehaviour
     public Data data;
     public Plant PlantPrefab;
     [SerializeField] private TMP_Text heartsText;
-    [SerializeField] private GameObject uiInventory;
-    [SerializeField] private GameObject uiIntro;
-    [SerializeField] private GameObject uiSeedStarters;
+    [SerializeField] private GameObject menus;
+    [SerializeField] private GameObject springWindow;
+    [SerializeField] private GameObject summerWindow;
+    [SerializeField] private GameObject fallWindow;
+    [SerializeField] private GameObject winterWindow;
     public Inventory inventory;
 
     bool isPaused = false;
@@ -27,7 +29,8 @@ public class Controller : MonoBehaviour
         //PlayerPrefs.DeleteAll();
         if (! PlayerPrefs.HasKey("saveData")) // no save data, run tutorial
         {
-            Tutorial();
+            MenuUI menuScripts = menus.GetComponent<MenuUI>();
+            menuScripts.TutorialHemis();
             data.plantIDs[0] = 0; 
             Plant tempPlant = Instantiate(PlantPrefab, plantsPanel);
             tempPlant.plantID = 0;
@@ -38,6 +41,62 @@ public class Controller : MonoBehaviour
         } else
         {
             loadSave();
+            SetSeasonWindow();
+        }
+    }
+
+    public void SetSeasonWindow()
+    {
+        // add handling for spring/summer/fall/winter, with handling for hemispheres
+        string utcMonth = System.DateTime.UtcNow.ToString("MMMM");
+        int utcDay = int.Parse(System.DateTime.UtcNow.ToString("dd"));
+        string currSeason = "spring";
+        if (utcMonth == "January" || utcMonth == "February" || (utcMonth == "December" && utcDay >= 21) || (utcMonth == "March" && utcDay < 20))
+        {
+            currSeason = "winter";
+            if (data.hemisphere == "south")
+            {
+                currSeason = "summer";
+            }
+        }
+        else if (utcMonth == "April" || utcMonth == "May" || (utcMonth == "March" && utcDay >= 20) || (utcMonth == "June" && utcDay < 20))
+        {
+            currSeason = "spring";
+            if (data.hemisphere == "south")
+            {
+                currSeason = "fall";
+            }
+        }
+        else if (utcMonth == "July" || utcMonth == "August" || (utcMonth == "June" && utcDay >= 20) || (utcMonth == "September" && utcDay < 21))
+        {
+            currSeason = "summer";
+            if (data.hemisphere == "south")
+            {
+                currSeason = "winter";
+            }
+        }
+        else
+        {
+            currSeason = "fall";
+            if (data.hemisphere == "south")
+            {
+                currSeason = "spring";
+            }
+        }
+        if (currSeason == "summer")
+        {
+            springWindow.SetActive(false);
+            summerWindow.SetActive(true);
+        }
+        else if (currSeason == "fall")
+        {
+            springWindow.SetActive(false);
+            fallWindow.SetActive(true);
+        }
+        else if (currSeason == "winter")
+        {
+            springWindow.SetActive(false);
+            winterWindow.SetActive(true);
         }
     }
 
@@ -51,7 +110,7 @@ public class Controller : MonoBehaviour
                 if (data.plants[i].Timer >= data.plants[i].HeartTimer)
                 {
                     data.plants[i].Timer = 0f;
-                    data.hearts += 1;
+                    data.hearts = Mathf.Min(data.hearts + 1, 9999);
 
                     Transform prefab = Instantiate(data.plants[i].heartAnimation, data.plants[i].animationHolder);
                     StartCoroutine(destroyHeart(prefab));
@@ -79,38 +138,6 @@ public class Controller : MonoBehaviour
         GameObject.Destroy(heartObj.gameObject);
     }
 
-    private void Tutorial()
-    {
-        uiIntro.SetActive(true);
-        int seed1Num = UnityEngine.Random.Range(1, data.seedsCommon.Count) - 1;
-        int seed2Num = UnityEngine.Random.Range(1, data.seedsCommon.Count) - 1;
-        if (seed1Num == seed2Num)
-        {
-            seed2Num = seed1Num + 1;
-            if (seed2Num == data.seedsCommon.Count)
-            {
-                seed2Num = 0;
-            }
-        }
-        //print(seed1Num);
-        //print(seed2Num);
-        //data.inventory.AddItem(data.seedsCommon.Where(Seed => Seed.seedType == Seed.SeedType.ViolaFern).SingleOrDefault());
-        data.inventory.AddItem(data.seedsCommon[seed1Num]);
-        data.inventory.AddItem(data.seedsCommon[seed2Num]);
-
-        int count = 0;
-        int seedNum = seed1Num;
-        foreach (Transform seedStarterTemplate in uiSeedStarters.transform)
-        {
-            Transform itemImage = seedStarterTemplate.transform.GetChild(0);
-            Transform itemText = seedStarterTemplate.transform.GetChild(1);
-            itemText.GetComponent<TMPro.TextMeshProUGUI>().text = data.seedsCommon[seedNum].preDescription;
-            itemImage.GetComponent<Image>().sprite = Resources.Load<Sprite>(data.seedsCommon[seedNum].textureName + "-seed");
-            count++;
-            seedNum = seed2Num;
-        }
-    }
-
     void OnApplicationFocus(bool hasFocus)
     {
         isPaused = !hasFocus;
@@ -129,6 +156,7 @@ public class Controller : MonoBehaviour
     {
         print("saving");
         PlayerPrefs.SetInt("saveData", 1);
+        PlayerPrefs.SetString("hemisphere", data.hemisphere);
         if (data.plantIDs != null)
         {
             PlayerPrefs.SetString("plantIDs", string.Join(",", data.plantIDs));
@@ -144,6 +172,7 @@ public class Controller : MonoBehaviour
                 string plantSeedRarity = data.plants[i].activeSeed.rarity;
                 PlayerPrefs.SetString("plant" + i + "rarity", plantSeedRarity);
                 PlayerPrefs.SetInt("plant" + i + "stage", data.plants[i].stage);
+                PlayerPrefs.SetString("plant" + i + "growth", data.plants[i].GrowthTimer.ToString());
             }
         }
         // save inventory
@@ -157,12 +186,14 @@ public class Controller : MonoBehaviour
         PlayerPrefs.SetString("inventoryCounts", string.Join(",", inventoryCounts));
         PlayerPrefs.SetInt("numSeedsBought", data.numSeedsBought);
         PlayerPrefs.SetInt("numPlantPotsBought", data.numPlantPotsBought);
+        PlayerPrefs.Save();
     }
 
     private void loadSave()
     {
+        data.hemisphere = PlayerPrefs.GetString("hemisphere", "north");
         string tempInventoryIDs = PlayerPrefs.GetString("inventoryIDs", "noIDs");
-        if (tempInventoryIDs != "noIDs")
+        if (tempInventoryIDs != "noIDs" && tempInventoryIDs != "")
         {
             string[] tempInventory = tempInventoryIDs.Split(',');
             for (int i = 0; i < tempInventory.Length; i++)
@@ -172,7 +203,7 @@ public class Controller : MonoBehaviour
         }
         // inventory amounts
         string inventoryValString = PlayerPrefs.GetString("inventoryCounts", "noAmounts");
-        if (inventoryValString != "noAmounts")
+        if (inventoryValString != "noAmounts" && inventoryValString != "")
         {
             int[] inventoryVals = Array.ConvertAll(inventoryValString.Split(','), int.Parse);
             for ( int i = 0; i < data.inventory.GetCount(); i++ )
@@ -219,6 +250,7 @@ public class Controller : MonoBehaviour
                         tempColor.a = 1f;
                         tempPlant.sprout.color = tempColor;
                         tempPlant.activeSeed = data.findSeed(tempSeedData);
+                        tempPlant.GrowthTimer = float.Parse(PlayerPrefs.GetString("plant" + i + "growth", foundSeed.timeToGrow1.ToString()));
                     }
                     data.plants[i] = tempPlant;
                     data.plants[i].stage = tempSeedStage;

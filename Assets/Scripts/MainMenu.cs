@@ -2,15 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class MainMenu : MonoBehaviour
 {
     [SerializeField] private GameObject settingsMenu;
     [SerializeField] private GameObject creditsMenu;
+    [SerializeField] private TMP_Text playText;
+    [SerializeField] private TMP_Text playTextShadow;
 
     public Animator transition;
     public Animator musicTransition;
     public float transitionTime = 1f;
+
+    public void Update()
+    {
+        if (PlayerPrefs.HasKey("saveData")) // save data found
+        {
+            playText.text = "Continue";
+            playTextShadow.text = "Continue";
+        }
+    }
 
     public void PlayGame()
     {

@@ -8,12 +8,18 @@ public class MenuUI : MonoBehaviour
 {
     private GameObject controllerObj;
     private Controller controller;
+    public Plant PlantPrefab;
+    public Transform plantsPanel;
+
+    [SerializeField] private GameObject uiHemisphereIntro;
+    [SerializeField] private TMP_Text hemisphereText;
+    [SerializeField] private GameObject uiIntro;
+    [SerializeField] private GameObject uiSeedStarters;
 
     [SerializeField] private GameObject noSeedText;
     [SerializeField] private Transform inventoryContent;
     [SerializeField] private Transform itemPrefab;
     [SerializeField] private GameObject inventoryUI;
-    [SerializeField] private GameObject uiIntro;
 
     /* shop */
     [SerializeField] private GameObject shopUI;
@@ -23,6 +29,9 @@ public class MenuUI : MonoBehaviour
     [SerializeField] private TMP_Text potPrice;
     [SerializeField] private GameObject seedBuySuccess;
     [SerializeField] private Transform seedPurchasePrefab;
+    [SerializeField] private GameObject plantPotConfirm;
+    [SerializeField] private GameObject plantPotSuccess;
+    [SerializeField] private TMP_Text potConfirmText;
 
     public void Start()
     {
@@ -102,7 +111,7 @@ public class MenuUI : MonoBehaviour
             SFXManager.sfxInstance.Audio.PlayOneShot(SFXManager.sfxInstance.Click);
             shopUI.SetActive(true);
             seedPrice.text = (controller.data.initialSeedCost + (controller.data.seedIncrease * controller.data.numSeedsBought)).ToString();
-            potPrice.text = (controller.data.initialPotCost + controller.data.initialPotCost * controller.data.numPlantPotsBought).ToString();
+            potPrice.text = (controller.data.initialPotCost + 8500 * controller.data.numPlantPotsBought).ToString();
         }
     }
 
@@ -116,6 +125,41 @@ public class MenuUI : MonoBehaviour
     {
         SFXManager.sfxInstance.Audio.PlayOneShot(SFXManager.sfxInstance.Close);
         inventoryUI.SetActive(false);
+    }
+
+    public void BuyPot()
+    {
+        if ( controller.data.hearts >= (controller.data.initialPotCost + 8500 * controller.data.numPlantPotsBought))
+        {
+            shopUI.SetActive(false);
+            plantPotConfirm.SetActive(true);
+            potConfirmText.text = (controller.data.initialPotCost + 8500 * controller.data.numPlantPotsBought).ToString();
+        }
+    }
+
+    public void BuyPotCancel()
+    {
+        plantPotConfirm.SetActive(false);
+    }
+
+    public void BuyPotConfirm()
+    {
+        plantPotConfirm.SetActive(false);
+        plantPotSuccess.SetActive(true);
+        controller.data.hearts -= (controller.data.initialPotCost + 8500 * controller.data.numPlantPotsBought);
+        controller.data.numPlantPotsBought++;
+        controller.data.plantIDs[controller.data.numPlantPotsBought] = 1;
+        Plant tempPlant = Instantiate(PlantPrefab, plantsPanel);
+        tempPlant.plantID = 0;
+        tempPlant.active = false;
+        tempPlant.activeSeed = null;
+        tempPlant.stage = -1;
+        controller.data.plants[controller.data.numPlantPotsBought] = tempPlant;
+    }
+
+    public void BuyPotClose()
+    {
+        plantPotSuccess.SetActive(false);
     }
 
     public void BuySeed()
@@ -154,6 +198,7 @@ public class MenuUI : MonoBehaviour
             }
             controller.data.inventory.AddItem(randomSeed);
             controller.data.hearts -= (controller.data.initialSeedCost + (controller.data.seedIncrease * controller.data.numSeedsBought));
+            controller.data.numSeedsBought++;
 
             Transform itemImage = seedPurchasePrefab.transform.GetChild(0);
             Transform itemText = seedPurchasePrefab.transform.GetChild(1);
@@ -171,5 +216,60 @@ public class MenuUI : MonoBehaviour
     public void CloseTutorial()
     {
         uiIntro.SetActive(false);
+    }
+
+
+    public void TutorialHemis()
+    {
+        uiHemisphereIntro.SetActive(true);
+    }
+
+    public void SouthHemis()
+    {
+        controller.data.hemisphere = "south";
+        Tutorial();
+    }
+    public void NorthHemis()
+    {
+        controller.data.hemisphere = "north";
+        Tutorial();
+    }
+
+    private void Tutorial()
+    {
+        controller.SetSeasonWindow();
+        uiHemisphereIntro.SetActive(false);
+        uiIntro.SetActive(true);
+        if ( controller.data.hemisphere == "north" )
+        {
+            hemisphereText.text = "So you're in the northern hemisphere, great!";
+        }
+        int seed1Num = UnityEngine.Random.Range(1, controller.data.seedsCommon.Count) - 1;
+        int seed2Num = UnityEngine.Random.Range(1, controller.data.seedsCommon.Count) - 1;
+        if (seed1Num == seed2Num)
+        {
+            seed2Num = seed1Num + 1;
+            if (seed2Num == controller.data.seedsCommon.Count)
+            {
+                seed2Num = 0;
+            }
+        }
+        //print(seed1Num);
+        //print(seed2Num);
+        //data.inventory.AddItem(data.seedsCommon.Where(Seed => Seed.seedType == Seed.SeedType.ViolaFern).SingleOrDefault());
+        controller.data.inventory.AddItem(controller.data.seedsCommon[seed1Num]);
+        controller.data.inventory.AddItem(controller.data.seedsCommon[seed2Num]);
+
+        int count = 0;
+        int seedNum = seed1Num;
+        foreach (Transform seedStarterTemplate in uiSeedStarters.transform)
+        {
+            Transform itemImage = seedStarterTemplate.transform.GetChild(0);
+            Transform itemText = seedStarterTemplate.transform.GetChild(1);
+            itemText.GetComponent<TMPro.TextMeshProUGUI>().text = controller.data.seedsCommon[seedNum].preDescription;
+            itemImage.GetComponent<Image>().sprite = Resources.Load<Sprite>(controller.data.seedsCommon[seedNum].textureName + "-seed");
+            count++;
+            seedNum = seed2Num;
+        }
     }
 }
