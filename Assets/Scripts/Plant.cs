@@ -17,6 +17,16 @@ public class Plant : MonoBehaviour
     public float GrowthTimer;
     public Seed activeSeed;
     public int stage;
+    /* wilting */
+    public float WiltTimer; // overall timer for wilting, used to also unwilt
+    private float BeginWiltTime;
+    private float FullyWiltTime;
+    public float WiltDuration; // duration between beginning of wilt and end of wilt
+    public int wiltStage;
+    public Color wiltColor;
+    public Color normalColor;
+    private bool wiltShaking;
+    private float tempAlpha;
 
     [SerializeField] private GameObject uiInactiveMenu;
     [SerializeField] private GameObject uiActiveMenu;
@@ -26,22 +36,87 @@ public class Plant : MonoBehaviour
     [SerializeField] private Transform seedButtonPrefab;
     [SerializeField] public Transform animationHolder;
     [SerializeField] public Transform heartAnimation;
+    [SerializeField] private CanvasGroup wiltIcon;
+    [SerializeField] private Button tendButton;
+    [SerializeField] private Button harvestButton;
+    [SerializeField] private GameObject harvestConfirm;
+    [SerializeField] private GameObject sparkle;
+
+    public Animator wiggleAnimation;
+
+    public void Awake()
+    {
+        HeartTimer = 2; //todo: fix according to actual heartTimer from seed
+        wiltStage = -1;
+    }
 
     public void Start()
     {
         controllerObj = GameObject.Find("/Scripts/Controller");
         controller = controllerObj.GetComponent<Controller>();
-        HeartTimer = 15;
+        wiltShaking = true;
+        tempAlpha = 0;
+
+        // set wilt color
+        float H, S, V;
+        normalColor = Color.white;
+        wiltColor = normalColor;
+        wiltColor.r = wiltColor.r * 1.5f;
+        wiltColor.g = wiltColor.g * 1.0f;
+        wiltColor.b = 0f;
+        Color.RGBToHSV(wiltColor, out H, out S, out V);
+        S = 1f;
+        V = 1f;
+        wiltColor = Color.HSVToRGB(H, S, V);
+
+        // temporary wilttime set
+        float WiltTime = 100f;
+        BeginWiltTime = WiltTime * 0.75f;
+        FullyWiltTime = WiltTime;
     }
 
     public void Update()
     {
-        if ( stage == 0 )
+        if ( wiltStage != -1 && (wiltStage == 0 || wiltStage == 1) )
         {
-            growToTeen(activeSeed.timeToGrow1);
-        } else if ( stage == 1 )
+            if (stage == 0)
+            {
+                growToTeen(activeSeed.timeToGrow1);
+            }
+            else if (stage == 1)
+            {
+                growToAdult(activeSeed.timeToGrow2);
+            }
+            wilt();
+        } 
+        if ( wiltShaking == true && wiltStage == 2)
         {
-            growToAdult(activeSeed.timeToGrow2);
+            StartCoroutine(wiltIconShake(Random.Range(1f, 5f)));
+        }
+        if ( wiltStage == 4 )
+        {
+            unwilt();
+        }
+        if (wiltStage >= 1 && wiltStage <= 3)
+        {
+            tendButton.interactable = true;
+        }
+    }
+
+    public void setupPlantFromSave()
+    {
+        if ( wiltStage == 1 )
+        {
+            HeartTimer = HeartTimer * 2;
+            normalColor = sprout.color; // temporarily set the "normal" color to the current color
+            tempAlpha = WiltDuration / (FullyWiltTime - WiltTimer);
+            wiltIcon.alpha = tempAlpha;
+            harvestButton.interactable = false;
+        } else if ( wiltStage == 2 )
+        {
+            wiltIcon.alpha = 1;
+            HeartTimer = 0;
+            harvestButton.interactable = false;
         }
     }
 
@@ -119,11 +194,33 @@ public class Plant : MonoBehaviour
         sprout.color = tempColor;
         activeSeed = seedData;
         stage = 0; // baby
+        wiltStage = 0;
         //PlayerPrefs.SetString("plant" + plantID + "seed", seedData.seedType.ToString());
         if ( controller.data.plants[plantID] == null ) // is this statement necessary???
         {
             controller.data.plants[plantID] = this;
         }
+    }
+
+    public void tendPlant()
+    {
+        if (wiltStage >= 1 && wiltStage <= 3)
+        {
+            WiltTimer = 0f;
+            wiltStage = 4;
+            HeartTimer = 2; //todo: fix according to actual heartTimer from seed
+            wiltIcon.alpha = 0;
+            tendButton.interactable = false;
+            uiActiveMenu.SetActive(false);
+            sparkle.SetActive(true);
+            StartCoroutine(stopSparkle());
+        }
+    }
+
+    IEnumerator stopSparkle()
+    {
+        yield return new WaitForSeconds(0.6f);
+        sparkle.SetActive(false);
     }
 
     private void growToTeen(float countTime = 3f) // pass in the amount of time til it grows
@@ -147,5 +244,55 @@ public class Plant : MonoBehaviour
             sprout.sprite = Resources.Load<Sprite>(activeSeed.textureName + "-adult");
             stage = 2;
         }
+    }
+
+    private void wilt()
+    {
+        WiltTimer += Time.deltaTime;
+        if ( WiltTimer >= BeginWiltTime && WiltTimer < FullyWiltTime) // begin to yellow
+        {
+            sprout.color = Color.Lerp(normalColor, wiltColor, WiltDuration / (FullyWiltTime - WiltTimer));
+            wiltIcon.alpha = Mathf.Lerp(tempAlpha, 1, WiltDuration / (FullyWiltTime - WiltTimer));
+            WiltDuration += Time.deltaTime;
+            if ( wiltStage == 0 )
+            {
+                HeartTimer = HeartTimer * 2;
+            }
+            wiltStage = 1;
+            harvestButton.interactable = false;
+        } else if ( WiltTimer >= FullyWiltTime ) // fully wilted
+        {
+            // correct for saving
+            tempAlpha = 0;
+            normalColor = Color.white;
+            wiltStage = 2;
+            HeartTimer = 0;
+        }
+    }
+
+    private void unwilt()
+    {
+        if (WiltTimer < 6f)
+        {
+            sprout.color = Color.Lerp(wiltColor, normalColor, WiltTimer / 6f); // slowly unwilt
+            WiltTimer += Time.deltaTime;
+        } else
+        {
+            harvestButton.interactable = true;
+            sprout.color = normalColor;
+            WiltTimer = 0f;
+            wiltStage = 0;
+            HeartTimer = 2; //todo fix according to actual hearttimer from seed
+        }
+    }
+
+    IEnumerator wiltIconShake(float randomDuration)
+    {
+        wiltShaking = false;
+        wiggleAnimation.SetTrigger("Wiggle");
+        yield return new WaitForSeconds(randomDuration);
+        // shake the icon
+        wiggleAnimation.SetTrigger("NoWiggle");
+        wiltShaking = true;
     }
 }

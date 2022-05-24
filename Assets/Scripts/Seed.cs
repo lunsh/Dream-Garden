@@ -44,8 +44,7 @@ public class Seed
     public float timeToAccumulateHeart1;
     /*public float timeToAccumulateHeart2;
     public float timeToAccumulateHeart3;
-    public float timeToWilt1;
-    public float timeToWilt2;
+    public float timeToWilt;
     public string description;
     */
 }

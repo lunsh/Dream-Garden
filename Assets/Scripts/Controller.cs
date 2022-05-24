@@ -104,7 +104,7 @@ public class Controller : MonoBehaviour
     {
         for (int i = 0; i < data.plants.Count; i++)
         {
-            if (data.plants[i] != null && data.plants[i].active == true)
+            if (data.plants[i] != null && data.plants[i].active == true && data.plants[i].HeartTimer > 0)
             {
                 data.plants[i].Timer += Time.deltaTime;
                 if (data.plants[i].Timer >= data.plants[i].HeartTimer)
@@ -173,6 +173,12 @@ public class Controller : MonoBehaviour
                 PlayerPrefs.SetString("plant" + i + "rarity", plantSeedRarity);
                 PlayerPrefs.SetInt("plant" + i + "stage", data.plants[i].stage);
                 PlayerPrefs.SetString("plant" + i + "growth", data.plants[i].GrowthTimer.ToString());
+
+                // wilting
+                PlayerPrefs.SetString("plant" + i + "currcolor", ColorUtility.ToHtmlStringRGB(data.plants[i].sprout.color));
+                PlayerPrefs.SetInt("plant" + i + "wiltStage", data.plants[i].wiltStage);
+                PlayerPrefs.SetString("plant" + i + "wiltTimer", data.plants[i].WiltTimer.ToString());
+                PlayerPrefs.SetString("Plant" + i + "wiltDuration", data.plants[i].WiltDuration.ToString());
             }
         }
         // save inventory
@@ -191,6 +197,7 @@ public class Controller : MonoBehaviour
 
     private void loadSave()
     {
+        print("loading");
         data.hemisphere = PlayerPrefs.GetString("hemisphere", "north");
         string tempInventoryIDs = PlayerPrefs.GetString("inventoryIDs", "noIDs");
         if (tempInventoryIDs != "noIDs" && tempInventoryIDs != "")
@@ -246,14 +253,20 @@ public class Controller : MonoBehaviour
                         {
                             tempPlant.sprout.sprite = Resources.Load<Sprite>(foundSeed.textureName + "-adult");
                         }
+                        string tempColorString = "#" + PlayerPrefs.GetString("plant" + i + "currcolor", "nocolor");
                         var tempColor = tempPlant.sprout.color;
+                        ColorUtility.TryParseHtmlString(tempColorString, out tempColor);
                         tempColor.a = 1f;
                         tempPlant.sprout.color = tempColor;
                         tempPlant.activeSeed = data.findSeed(tempSeedData);
                         tempPlant.GrowthTimer = float.Parse(PlayerPrefs.GetString("plant" + i + "growth", foundSeed.timeToGrow1.ToString()));
+                        tempPlant.WiltDuration = float.Parse(PlayerPrefs.GetString("plant" + i + "wiltDuration", 0f.ToString()));
+                        tempPlant.WiltTimer = float.Parse(PlayerPrefs.GetString("plant" + i + "wiltTimer", 0f.ToString()));
                     }
                     data.plants[i] = tempPlant;
                     data.plants[i].stage = tempSeedStage;
+                    data.plants[i].wiltStage = PlayerPrefs.GetInt("plant" + i + "wiltStage", -1);
+                    data.plants[i].setupPlantFromSave();
                 }
             }
         }
