@@ -27,6 +27,7 @@ public class Plant : MonoBehaviour
     public Color normalColor;
     private bool wiltShaking;
     private float tempAlpha;
+    private float unWiltTime;
 
     [SerializeField] private GameObject uiInactiveMenu;
     [SerializeField] private GameObject uiActiveMenu;
@@ -206,7 +207,15 @@ public class Plant : MonoBehaviour
     {
         if (wiltStage >= 1 && wiltStage <= 3)
         {
-            WiltTimer = 0f;
+            if (wiltStage == 2)
+            {
+                WiltTimer = 60f;
+                unWiltTime = 60f;
+            } else
+            {
+                unWiltTime = WiltDuration;
+                WiltTimer = WiltDuration;
+            }
             wiltStage = 4;
             HeartTimer = 2; //todo: fix according to actual heartTimer from seed
             wiltIcon.alpha = 0;
@@ -272,15 +281,17 @@ public class Plant : MonoBehaviour
 
     private void unwilt()
     {
-        if (WiltTimer < 6f)
+        print(WiltTimer);
+        if (WiltTimer > 0f)
         {
-            sprout.color = Color.Lerp(wiltColor, normalColor, WiltTimer / 6f); // slowly unwilt
-            WiltTimer += Time.deltaTime;
+            sprout.color = Color.Lerp(wiltColor, normalColor, (unWiltTime - WiltTimer) / unWiltTime); // slowly unwilt
+            WiltTimer -= Time.deltaTime;
         } else
         {
             harvestButton.interactable = true;
             sprout.color = normalColor;
             WiltTimer = 0f;
+            WiltDuration = 0f;
             wiltStage = 0;
             HeartTimer = 2; //todo fix according to actual hearttimer from seed
         }
