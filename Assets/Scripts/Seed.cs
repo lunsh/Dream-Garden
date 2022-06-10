@@ -41,10 +41,11 @@ public class Seed
     public string textureName;
     public float timeToGrow1;
     public float timeToGrow2;
-    public float timeToAccumulateHeart1;
-    /*public float timeToAccumulateHeart2;
-    public float timeToAccumulateHeart3;
+    public int heartsGenerate1;
+    public int heartsGenerate2;
+    public int heartsGenerate3;
+    public int id;
+    public string name;
     public float timeToWilt;
     public string description;
-    */
 }

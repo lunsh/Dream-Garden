@@ -29,25 +29,27 @@ public class Plant : MonoBehaviour
     private float tempAlpha;
     private float unWiltTime;
 
+    private int harvestAmount;
+
     [SerializeField] private GameObject uiInactiveMenu;
     [SerializeField] private GameObject uiActiveMenu;
-    [SerializeField] private GameObject uiSeedSelect;
-    [SerializeField] private GameObject uiNoSeedText;
-    [SerializeField] private Transform uiInventoryContent;
     [SerializeField] private Transform seedButtonPrefab;
     [SerializeField] public Transform animationHolder;
     [SerializeField] public Transform heartAnimation;
     [SerializeField] private CanvasGroup wiltIcon;
     [SerializeField] private Button tendButton;
+    [SerializeField] private Button potButton;
     [SerializeField] private Button harvestButton;
-    [SerializeField] private GameObject harvestConfirm;
     [SerializeField] private GameObject sparkle;
+    [SerializeField] private GameObject harvestAnimation;
+    [SerializeField] private GameObject customizeLockedButton;
+    [SerializeField] private GameObject customizeUnlockedButton;
 
     public Animator wiggleAnimation;
 
     public void Awake()
     {
-        HeartTimer = 2; //todo: fix according to actual heartTimer from seed
+        HeartTimer = 0;
         wiltStage = -1;
     }
 
@@ -70,10 +72,13 @@ public class Plant : MonoBehaviour
         V = 1f;
         wiltColor = Color.HSVToRGB(H, S, V);
 
-        // temporary wilttime set
-        float WiltTime = 100f;
-        BeginWiltTime = WiltTime * 0.75f;
-        FullyWiltTime = WiltTime;
+        if (wiltStage != -1)
+        {
+            BeginWiltTime = activeSeed.timeToWilt * 0.75f;
+            FullyWiltTime = activeSeed.timeToWilt;
+        }
+
+        setHeartTimer();
     }
 
     public void Update()
@@ -102,6 +107,32 @@ public class Plant : MonoBehaviour
         {
             tendButton.interactable = true;
         }
+
+        if (controller.data.customizeUnlock[plantID] == 1 )
+        {
+            Image potImage = potButton.gameObject.GetComponent<Image>();
+            Color tempColor = potImage.color;
+            ColorUtility.TryParseHtmlString("#" + controller.data.customizeColors[plantID], out tempColor);
+            tempColor.a = 1f;
+            potImage.color = tempColor;
+            var colors = potButton.colors;
+            colors.normalColor = tempColor;
+            potButton.colors = colors;
+        }
+    }
+
+    public void setHeartTimer()
+    {
+        if ( stage == 0 )
+        {
+            HeartTimer = activeSeed.heartsGenerate1;
+        } else if ( stage == 1 )
+        {
+            HeartTimer = activeSeed.heartsGenerate2;
+        } else if ( stage == 2 )
+        {
+            HeartTimer = activeSeed.heartsGenerate3;
+        }
     }
 
     public void setupPlantFromSave()
@@ -113,11 +144,17 @@ public class Plant : MonoBehaviour
             tempAlpha = WiltDuration / (FullyWiltTime - WiltTimer);
             wiltIcon.alpha = tempAlpha;
             harvestButton.interactable = false;
+
+            BeginWiltTime = activeSeed.timeToWilt * 0.75f;
+            FullyWiltTime = activeSeed.timeToWilt;
         } else if ( wiltStage == 2 )
         {
             wiltIcon.alpha = 1;
             HeartTimer = 0;
             harvestButton.interactable = false;
+
+            BeginWiltTime = activeSeed.timeToWilt * 0.75f;
+            FullyWiltTime = activeSeed.timeToWilt;
         }
     }
 
@@ -128,42 +165,53 @@ public class Plant : MonoBehaviour
             if ( uiInactiveMenu.activeSelf )
             {
                 uiInactiveMenu.SetActive(false);
+                SFXManager.sfxInstance.Audio.PlayOneShot(SFXManager.sfxInstance.Close);
             } else
             {
                 uiInactiveMenu.SetActive(true);
+                SFXManager.sfxInstance.Audio.PlayOneShot(SFXManager.sfxInstance.Click);
             }
         } else
         {
             if (uiActiveMenu.activeSelf)
             {
                 uiActiveMenu.SetActive(false);
+                SFXManager.sfxInstance.Audio.PlayOneShot(SFXManager.sfxInstance.Close);
             }
             else
             {
+                if (controller.data.customizeUnlock[plantID] == 1)
+                {
+                    customizeLockedButton.SetActive(false);
+                    customizeUnlockedButton.SetActive(true);
+                }
                 uiActiveMenu.SetActive(true);
+                SFXManager.sfxInstance.Audio.PlayOneShot(SFXManager.sfxInstance.Click);
             }
         }
     }
 
     public void sowSeed()
     {
-        uiSeedSelect.SetActive(true);
+        controller.uiSeedSelect.SetActive(true);
         uiInactiveMenu.SetActive(false);
+        SFXManager.sfxInstance.Audio.PlayOneShot(SFXManager.sfxInstance.Click);
+
+        controller.CurrentPlant = this;
 
         Inventory menuInventory = controller.data.inventory;
+        foreach (Transform child in controller.uiInventoryContent.transform)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
         if (menuInventory.GetCount() > 0)
         {
             // hide the "no seeds yet" text
-            uiNoSeedText.SetActive(false);
-
-            foreach (Transform child in uiInventoryContent.transform)
-            {
-                GameObject.Destroy(child.gameObject);
-            }
+            controller.uiNoSeedText.SetActive(false);
             for (int i = 0; i < menuInventory.GetCount(); i++)
             {
                 Seed seedData = controller.data.inventory.GetItem(i);
-                Transform prefab = Instantiate(seedButtonPrefab, uiInventoryContent);
+                Transform prefab = Instantiate(seedButtonPrefab, controller.uiInventoryContent);
 
                 Button prefabButton = prefab.GetComponent<Button>();
                 prefabButton.onClick.AddListener(() => selectSeed(seedData));
@@ -171,24 +219,41 @@ public class Plant : MonoBehaviour
                 Transform itemImage = prefab.transform.GetChild(0).GetChild(0);
                 Transform itemText = prefab.transform.GetChild(0).GetChild(1);
 
-                itemText.GetComponent<TMPro.TextMeshProUGUI>().text = seedData.preDescription;
+                Transform itemNumContainer = prefab.transform.GetChild(0).GetChild(2);
+                if (seedData.amount > 1)
+                {
+                    itemNumContainer.gameObject.SetActive(true);
+                    Transform itemNum = itemNumContainer.transform.GetChild(1);
+                    itemNum.GetComponent<TMPro.TextMeshProUGUI>().text = seedData.amount.ToString();
+                } else
+                {
+                    itemNumContainer.gameObject.SetActive(false);
+                }
+
+                if (controller.data.seedsDiscovered[seedData.id] != null)
+                {
+                    itemText.GetComponent<TMPro.TextMeshProUGUI>().text = seedData.name;
+                }
+                else
+                {
+                    itemText.GetComponent<TMPro.TextMeshProUGUI>().text = seedData.preDescription;
+                }
+
                 itemImage.GetComponent<Image>().sprite = Resources.Load<Sprite>(seedData.textureName + "-seed");
             }
+        } else
+        {
+            controller.uiNoSeedText.SetActive(true);
         }
-    }
-    
-    public void cancelSeed()
-    {
-        uiSeedSelect.SetActive(false);
     }
 
     public void selectSeed(Seed seedData)
     {
-        uiSeedSelect.SetActive(false);
+        controller.uiSeedSelect.SetActive(false);
+        SFXManager.sfxInstance.Audio.PlayOneShot(SFXManager.sfxInstance.Click);
         // remove seed from inventory
         controller.data.inventory.RemoveItem(seedData);
         active = true;
-        //PlayerPrefs.SetInt("plant" + plantID + "active", 1);
         sprout.sprite = Resources.Load<Sprite>(seedData.textureName + "-baby");
         var tempColor = sprout.color;
         tempColor.a = 1f;
@@ -196,11 +261,60 @@ public class Plant : MonoBehaviour
         activeSeed = seedData;
         stage = 0; // baby
         wiltStage = 0;
-        //PlayerPrefs.SetString("plant" + plantID + "seed", seedData.seedType.ToString());
+        GrowthTimer = 0f;
+        BeginWiltTime = activeSeed.timeToWilt * 0.75f;
+        FullyWiltTime = activeSeed.timeToWilt;
+        setHeartTimer();
         if ( controller.data.plants[plantID] == null ) // is this statement necessary???
         {
             controller.data.plants[plantID] = this;
         }
+    }
+
+    public void harvestPlantButton()
+    {
+        uiActiveMenu.SetActive(false);
+        controller.harvestConfirm.SetActive(true);
+        SFXManager.sfxInstance.Audio.PlayOneShot(SFXManager.sfxInstance.Click);
+        if (activeSeed.rarity == "Common")
+        {
+            if ( stage == 0 ) { harvestAmount = 100; }
+            if ( stage == 1 ) { harvestAmount = 200; }
+            if ( stage == 2 ) { harvestAmount = 400; }
+        } else if ( activeSeed.rarity == "Uncommon" )
+        {
+            if (stage == 0) { harvestAmount = 200; }
+            if (stage == 1) { harvestAmount = 400; }
+            if (stage == 2) { harvestAmount = 800; }
+        } else if (activeSeed.rarity == "Rare")
+        {
+            if (stage == 0) { harvestAmount = 300; }
+            if (stage == 1) { harvestAmount = 600; }
+            if (stage == 2) { harvestAmount = 1000; }
+        } else if (activeSeed.rarity == "Ultrarare")
+        {
+            if (stage == 0) { harvestAmount = 500; }
+            if (stage == 1) { harvestAmount = 1000; }
+            if (stage == 2) { harvestAmount = 2000; }
+        }
+        controller.harvestAmountText.text = harvestAmount.ToString();
+        controller.CurrentPlant = this;
+    }
+
+    public void harvestPlant()
+    {
+        harvestAnimation.SetActive(true);
+        SFXManager.sfxInstance.Audio.PlayOneShot(SFXManager.sfxInstance.Click);
+        controller.harvestPlant(this, harvestAmount);
+        StartCoroutine(stopHarvestAnimation());
+    }
+
+    IEnumerator stopHarvestAnimation()
+    {
+        yield return new WaitForSeconds(0.48f);
+        WiltTimer = 0f;
+        WiltDuration = 0f;
+        harvestAnimation.SetActive(false);
     }
 
     public void tendPlant()
@@ -209,16 +323,18 @@ public class Plant : MonoBehaviour
         {
             if (wiltStage == 2)
             {
-                WiltTimer = 60f;
-                unWiltTime = 60f;
+                WiltTimer = activeSeed.timeToWilt;
+                unWiltTime = activeSeed.timeToWilt;
             } else
             {
-                unWiltTime = WiltDuration;
-                WiltTimer = WiltDuration;
+                unWiltTime = Mathf.Min(WiltDuration, activeSeed.timeToWilt);
+                WiltTimer = Mathf.Min(WiltDuration, activeSeed.timeToWilt);
+                wiltColor = sprout.color;
             }
             wiltStage = 4;
-            HeartTimer = 2; //todo: fix according to actual heartTimer from seed
+            setHeartTimer(); //todo: fix according to actual heartTimer from seed
             wiltIcon.alpha = 0;
+            SFXManager.sfxInstance.Audio.PlayOneShot(SFXManager.sfxInstance.Click);
             tendButton.interactable = false;
             uiActiveMenu.SetActive(false);
             sparkle.SetActive(true);
@@ -241,6 +357,7 @@ public class Plant : MonoBehaviour
             GrowthTimer = 0f;
             sprout.sprite = Resources.Load<Sprite>(activeSeed.textureName + "-teenager");
             stage = 1;
+            setHeartTimer();
         }
     }
 
@@ -252,6 +369,29 @@ public class Plant : MonoBehaviour
             count++;
             sprout.sprite = Resources.Load<Sprite>(activeSeed.textureName + "-adult");
             stage = 2;
+            setHeartTimer();
+            bool prevDiscovered = true;
+            if (controller.data.seedsDiscovered[activeSeed.id] == null )
+            {
+                prevDiscovered = false;
+            }
+            controller.data.seedsDiscovered[activeSeed.id] = activeSeed.seedType.ToString();
+            if ( ! prevDiscovered )
+            {
+                controller.createNotification(activeSeed.name);
+                int numDiscovered = 0;
+                for (int i = 0; i < controller.data.seedsDiscovered.Length; i++)
+                {
+                    if (controller.data.seedsDiscovered[i] != null)
+                    {
+                        numDiscovered++;
+                    }
+                }
+                if (numDiscovered == controller.data.seedsDiscovered.Length )
+                {
+                    controller.showDiscoveredAll();
+                }
+            }
         }
     }
 
@@ -271,7 +411,6 @@ public class Plant : MonoBehaviour
             harvestButton.interactable = false;
         } else if ( WiltTimer >= FullyWiltTime ) // fully wilted
         {
-            // correct for saving
             tempAlpha = 0;
             normalColor = Color.white;
             wiltStage = 2;
@@ -281,7 +420,6 @@ public class Plant : MonoBehaviour
 
     private void unwilt()
     {
-        print(WiltTimer);
         if (WiltTimer > 0f)
         {
             sprout.color = Color.Lerp(wiltColor, normalColor, (unWiltTime - WiltTimer) / unWiltTime); // slowly unwilt
@@ -293,7 +431,18 @@ public class Plant : MonoBehaviour
             WiltTimer = 0f;
             WiltDuration = 0f;
             wiltStage = 0;
-            HeartTimer = 2; //todo fix according to actual hearttimer from seed
+
+            float H, S, V;
+            normalColor = Color.white;
+            wiltColor = normalColor;
+            wiltColor.r = wiltColor.r * 1.5f;
+            wiltColor.g = wiltColor.g * 1.0f;
+            wiltColor.b = 0f;
+            Color.RGBToHSV(wiltColor, out H, out S, out V);
+            S = 1f;
+            V = 1f;
+            wiltColor = Color.HSVToRGB(H, S, V);
+            setHeartTimer();
         }
     }
 
@@ -305,5 +454,17 @@ public class Plant : MonoBehaviour
         // shake the icon
         wiggleAnimation.SetTrigger("NoWiggle");
         wiltShaking = true;
+    }
+
+    public void toggleUnlockCustomize()
+    {
+        uiActiveMenu.SetActive(false);
+        controller.showCustomizeUnlockPane(plantID);
+    }
+
+    public void toggleCustomize()
+    {
+        uiActiveMenu.SetActive(false);
+        controller.showCustomizePane(plantID);
     }
 }

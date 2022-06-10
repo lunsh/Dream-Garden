@@ -10,9 +10,10 @@ public class MainMenu : MonoBehaviour
     [SerializeField] private GameObject creditsMenu;
     [SerializeField] private TMP_Text playText;
     [SerializeField] private TMP_Text playTextShadow;
+    [SerializeField] private SettingsManager settings;
 
     public Animator transition;
-    public Animator musicTransition;
+    public AudioSource bgMusic;
     public float transitionTime = 1f;
 
     public void Update()
@@ -21,6 +22,10 @@ public class MainMenu : MonoBehaviour
         {
             playText.text = "Continue";
             playTextShadow.text = "Continue";
+        } else
+        {
+            playText.text = "New Game";
+            playTextShadow.text = "New Game";
         }
     }
 
@@ -34,7 +39,8 @@ public class MainMenu : MonoBehaviour
     {
         // play animation
         transition.SetTrigger("Start");
-        musicTransition.SetTrigger("FadeOut");
+        settings.transitioning = true;
+        StartCoroutine(FadeAudioSource.StartFade(bgMusic, transitionTime, 0));
         // wait
         yield return new WaitForSeconds(transitionTime);
         // load scene

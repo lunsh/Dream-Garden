@@ -10,6 +10,7 @@ public class Controller : MonoBehaviour
 {
     public Data data;
     public Plant PlantPrefab;
+
     [SerializeField] private TMP_Text heartsText;
     [SerializeField] private GameObject menus;
     [SerializeField] private GameObject springWindow;
@@ -21,6 +22,23 @@ public class Controller : MonoBehaviour
     bool isPaused = false;
 
     public Transform plantsPanel;
+    [SerializeField] public GameObject uiSeedSelect;
+    [SerializeField] public GameObject uiNoSeedText;
+    [SerializeField] public Transform uiInventoryContent;
+    [SerializeField] public Transform seedButtonPrefab;
+    [SerializeField] public GameObject harvestConfirm;
+    [SerializeField] public TMP_Text harvestAmountText;
+
+    [SerializeField] public GameObject notificationPane;
+    [SerializeField] public Transform notificationPrefab;
+    public Plant CurrentPlant;
+
+    [SerializeField] public GameObject customizeConfirmPane;
+    [SerializeField] public Button customizeConfirmButton;
+    [SerializeField] public GameObject customizePane;
+    [SerializeField] public Transform colorsTransform;
+
+    [SerializeField] public GameObject discoveredAllSeeds;
 
     private void Start()
     {
@@ -131,6 +149,26 @@ public class Controller : MonoBehaviour
         }
     }
 
+    public void harvestPlant(Plant harvestPlant, int harvestAmount )
+    {
+        AddHearts(harvestAmount);
+        harvestPlant.plantID = 0;
+        harvestPlant.active = false;
+        harvestPlant.activeSeed = null;
+        harvestPlant.stage = -1;
+        var tempColor = harvestPlant.sprout.color;
+        tempColor.a = 0f;
+        harvestPlant.sprout.color = tempColor;
+        harvestPlant.sprout.sprite = null;
+        harvestPlant.wiltStage = -1;
+    }
+
+    public void AddHearts(int hearts)
+    {
+        data.hearts = Mathf.Min(data.hearts + hearts, 9999);
+        heartsText.text = data.hearts.ToString();
+    }
+
     IEnumerator destroyHeart(Transform heartObj)
     {
         yield return new WaitForSeconds(1.0f);
@@ -152,11 +190,90 @@ public class Controller : MonoBehaviour
         isPaused = pauseStatus;
     }
 
+    public void createNotification(string seedName)
+    {
+        int numNotifications = notificationPane.transform.childCount;
+        if ( numNotifications >= 5 )
+        {
+            Destroy(notificationPane.transform.GetChild(0).gameObject); // destroy the oldest notification
+        }
+        Transform prefab = Instantiate(notificationPrefab, notificationPane.transform);
+
+        Transform itemText = prefab.transform.GetChild(1);
+        itemText.GetComponent<TMPro.TextMeshProUGUI>().text = "You have successfully grown a " + seedName + " and it has been added to your collection!";
+    }
+
+    public void showCustomizeUnlockPane(int plantID)
+    {
+        customizeConfirmPane.SetActive(true);
+        if ( data.hearts >= 1000 )
+        {
+            customizeConfirmButton.interactable = true;
+            customizeConfirmButton.onClick.RemoveAllListeners();
+            customizeConfirmButton.onClick.AddListener(() => unlockPotCustomization(plantID));
+        } else
+        {
+            customizeConfirmButton.interactable = false;
+        }
+    }
+
+    public void customizeUnlockCancel()
+    {
+        customizeConfirmPane.SetActive(false);
+    }
+
+    public void unlockPotCustomization(int plantID)
+    {
+        data.customizeUnlock[plantID] = 1;
+        data.hearts -= 1000;
+        customizeConfirmPane.SetActive(false);
+        showCustomizePane(plantID);
+    }
+
+    public void showCustomizePane(int plantID)
+    {
+        customizePane.SetActive(true);
+        string[] colors = new string[13] { "FFC5C5", "FF696C", "FFCD65", "9EF17F", "AAFFDA", "7DFFF7", "7FC0FF", "B897FF", "D76DB6", "D48F5C", "BBD7E3", "758891", "FFFFFF" };
+        int i = 0;
+        foreach(Transform childColor in colorsTransform)
+        {
+            if (data.customizeColors[plantID] == colors[i])
+            {
+                childColor.GetComponent<Button>().Select();
+            }
+            string tempString = colors[i];
+            childColor.GetComponent<Button>().onClick.RemoveAllListeners();
+            childColor.GetComponent<Button>().onClick.AddListener(() => setColor(plantID, tempString));
+            i++;
+        }
+    }
+
+    public void setColor(int plantID, string color)
+    {
+        data.customizeColors[plantID] = color;
+    }
+
+    public void closeCustomizePane()
+    {
+        customizePane.SetActive(false);
+    }
+
+    public void showDiscoveredAll()
+    {
+        discoveredAllSeeds.SetActive(true);
+    }
+
+    public void hideDiscoveredAll()
+    {
+        discoveredAllSeeds.SetActive(false);
+    }
+
     private void saveData()
     {
-        print("saving");
+        BGManager _bgmanager = GameObject.FindWithTag("BGManager").GetComponent<BGManager>();
         PlayerPrefs.SetInt("saveData", 1);
         PlayerPrefs.SetString("hemisphere", data.hemisphere);
+        PlayerPrefs.SetInt("playlisttrack", _bgmanager.songPlaying);
         if (data.plantIDs != null)
         {
             PlayerPrefs.SetString("plantIDs", string.Join(",", data.plantIDs));
@@ -179,6 +296,16 @@ public class Controller : MonoBehaviour
                 PlayerPrefs.SetInt("plant" + i + "wiltStage", data.plants[i].wiltStage);
                 PlayerPrefs.SetString("plant" + i + "wiltTimer", data.plants[i].WiltTimer.ToString());
                 PlayerPrefs.SetString("Plant" + i + "wiltDuration", data.plants[i].WiltDuration.ToString());
+            } else
+            {
+                PlayerPrefs.DeleteKey("plant" + i + "seed");
+                PlayerPrefs.DeleteKey("plant" + i + "rarity");
+                PlayerPrefs.DeleteKey("plant" + i + "stage");
+                PlayerPrefs.DeleteKey("plant" + i + "growth");
+                PlayerPrefs.DeleteKey("plant" + i + "currcolor");
+                PlayerPrefs.DeleteKey("plant" + i + "wiltStage");
+                PlayerPrefs.DeleteKey("plant" + i + "wiltTimer");
+                PlayerPrefs.DeleteKey("plant" + i + "wiltDuration");
             }
         }
         // save inventory
@@ -192,13 +319,23 @@ public class Controller : MonoBehaviour
         PlayerPrefs.SetString("inventoryCounts", string.Join(",", inventoryCounts));
         PlayerPrefs.SetInt("numSeedsBought", data.numSeedsBought);
         PlayerPrefs.SetInt("numPlantPotsBought", data.numPlantPotsBought);
+
+        // save collection
+        if (data.seedsDiscovered != null)
+        {
+            PlayerPrefs.SetString("seedsDiscovered", string.Join(",", data.seedsDiscovered));
+        }
+        // save pot colors
+        PlayerPrefs.SetString("customizeUnlock", string.Join(",", data.customizeUnlock));
+        PlayerPrefs.SetString("customizeColors", string.Join(",", data.customizeColors));
         PlayerPrefs.Save();
     }
 
     private void loadSave()
     {
-        print("loading");
         data.hemisphere = PlayerPrefs.GetString("hemisphere", "north");
+        BGManager _bgmanager = GameObject.FindWithTag("BGManager").GetComponent<BGManager>();
+        _bgmanager.songPlaying = PlayerPrefs.GetInt("playlisttrack", 0);
         string tempInventoryIDs = PlayerPrefs.GetString("inventoryIDs", "noIDs");
         if (tempInventoryIDs != "noIDs" && tempInventoryIDs != "")
         {
@@ -206,6 +343,28 @@ public class Controller : MonoBehaviour
             for (int i = 0; i < tempInventory.Length; i++)
             {
                 data.inventory.AddItem(data.findSeed(tempInventory[i]));
+            }
+        }
+        // colors
+        string tempCustomizeUnlock = PlayerPrefs.GetString("customizeUnlock", "-1,-1,-1");
+        data.customizeUnlock = Array.ConvertAll(tempCustomizeUnlock.Split(','), int.Parse);
+        string tempCustomizeColors = PlayerPrefs.GetString("customizeColors", "FFFFFF,FFFFFF,FFFFFF");
+        data.customizeColors = tempCustomizeColors.Split(',');
+        // load collection
+
+        string collectionIDs = PlayerPrefs.GetString("seedsDiscovered", "noCollection");
+        if (collectionIDs != "noCollection")
+        {
+            string[] tempCollection = collectionIDs.Split(',');
+            for ( int i = 0; i < tempCollection.Length; i++ )
+            {
+                if (tempCollection[i] == "")
+                {
+                    data.seedsDiscovered[i] = null;
+                } else
+                {
+                    data.seedsDiscovered[i] = tempCollection[i];
+                }
             }
         }
         // inventory amounts

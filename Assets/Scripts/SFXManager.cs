@@ -19,5 +19,6 @@ public class SFXManager : MonoBehaviour
             return;
         }
         sfxInstance = this;
+        DontDestroyOnLoad(sfxInstance);
     }
 }

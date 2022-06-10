@@ -56,7 +56,6 @@ public class Inventory
         {
             if (seedList[i].seedType == seed.seedType)
             {
-                Debug.Log("found it");
                 if ( seedList[i].amount > 1 ) // you have more than 1 so just decrease the amount
                 {
                     seedList[i].amount--;

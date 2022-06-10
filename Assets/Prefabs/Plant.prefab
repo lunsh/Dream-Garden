@@ -1,5 +1,41 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &69664637825900890
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8692277420520585543}
+  m_Layer: 0
+  m_Name: HarvestAnimation
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!224 &8692277420520585543
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 69664637825900890}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 35809490828590651}
+  m_Father: {fileID: 1200959999605454279}
+  m_RootOrder: 9
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -0.048025, y: 51.276}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &796965963514343323
 GameObject:
   m_ObjectHideFlags: 0
@@ -383,6 +419,101 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
+--- !u!1 &1054879369048101415
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 35809490828590651}
+  - component: {fileID: 6891917809732657730}
+  - component: {fileID: 6849805063997216149}
+  - component: {fileID: 3875232643329283290}
+  m_Layer: 0
+  m_Name: Image
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &35809490828590651
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1054879369048101415}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 8692277420520585543}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!222 &6891917809732657730
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1054879369048101415}
+  m_CullTransparentMesh: 1
+--- !u!114 &6849805063997216149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1054879369048101415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 7672203590720169685, guid: ef69e0b684b94ed47a1fb3d0b505072e, type: 3}
+  m_Type: 0
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
+--- !u!95 &3875232643329283290
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1054879369048101415}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: ed699c27de5634d42bfafdecd0e39b59, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &1084725158365881705
 GameObject:
   m_ObjectHideFlags: 0
@@ -1231,7 +1362,7 @@ GameObject:
   - component: {fileID: 1441481140131783946}
   - component: {fileID: 5780352371385886758}
   - component: {fileID: 3480495748253177287}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1514,6 +1645,7 @@ RectTransform:
   - {fileID: 1105068956906301517}
   - {fileID: 6141243178148827707}
   - {fileID: 3091726454824208413}
+  - {fileID: 8692277420520585543}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1548,17 +1680,17 @@ MonoBehaviour:
   normalColor: {r: 0, g: 0, b: 0, a: 0}
   uiInactiveMenu: {fileID: 3626968167850499600}
   uiActiveMenu: {fileID: 3626968169022213524}
-  uiSeedSelect: {fileID: 6248751382522580787}
-  uiNoSeedText: {fileID: 1041876588141316985}
-  uiInventoryContent: {fileID: 4543168862412506470}
   seedButtonPrefab: {fileID: 2227564358950951985, guid: 30950ca0b8ff0c344a10f803472b09a2, type: 3}
   animationHolder: {fileID: 5276940434397280952}
   heartAnimation: {fileID: 2938812542107274923, guid: 6420c7f104148ac4983bdafe5ac109a1, type: 3}
   wiltIcon: {fileID: 8401121382002058739}
   tendButton: {fileID: 3626968169774848227}
+  potButton: {fileID: 3626968169103294415}
   harvestButton: {fileID: 3626968168594993456}
-  harvestConfirm: {fileID: 0}
   sparkle: {fileID: 7592773266758987547}
+  harvestAnimation: {fileID: 69664637825900890}
+  customizeLockedButton: {fileID: 6170358890363093038}
+  customizeUnlockedButton: {fileID: 3626968169539100135}
   wiggleAnimation: {fileID: 1063687254167295991}
 --- !u!222 &5936429140229542454
 CanvasRenderer:
@@ -1786,7 +1918,7 @@ GameObject:
   - component: {fileID: 3626968167922654639}
   - component: {fileID: 3626968167922654633}
   - component: {fileID: 3626968167922654632}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1921,7 +2053,7 @@ GameObject:
   - component: {fileID: 3626968168594993458}
   - component: {fileID: 3626968168594993457}
   - component: {fileID: 3626968168594993456}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: HarvestButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2029,7 +2161,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3626968168594993457}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3626968167800272632}
+        m_TargetAssemblyTypeName: Plant, Assembly-CSharp
+        m_MethodName: harvestPlantButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &3626968168943144902
 GameObject:
   m_ObjectHideFlags: 0
@@ -2120,7 +2264,7 @@ GameObject:
   - component: {fileID: 3626968168973079972}
   - component: {fileID: 3626968168973079974}
   - component: {fileID: 3626968168973079973}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2268,7 +2412,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3626968169022213524}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.4000121, y: 88.499954, z: 0}
+  m_LocalPosition: {x: 0.4000121, y: 88.499954, z: 1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 3626968168943144903}
@@ -2430,7 +2574,7 @@ GameObject:
   - component: {fileID: 3626968169121276391}
   - component: {fileID: 3626968169121276385}
   - component: {fileID: 3626968169121276384}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2699,7 +2843,7 @@ GameObject:
   - component: {fileID: 3626968169539100131}
   - component: {fileID: 3626968169539100130}
   - component: {fileID: 3626968169539100129}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: CustomizeButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2807,7 +2951,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 3626968169539100130}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3626968167800272632}
+        m_TargetAssemblyTypeName: Plant, Assembly-CSharp
+        m_MethodName: toggleCustomize
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &3626968169541567231
 GameObject:
   m_ObjectHideFlags: 0
@@ -2896,7 +3052,7 @@ GameObject:
   - component: {fileID: 3626968169774848253}
   - component: {fileID: 3626968169774848252}
   - component: {fileID: 3626968169774848227}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: TendButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3574,7 +3730,7 @@ GameObject:
   - component: {fileID: 8581304700588474516}
   - component: {fileID: 6385728005352902529}
   - component: {fileID: 8024639279458627703}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: CustomizeButtonLocked
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3679,11 +3835,23 @@ MonoBehaviour:
     m_PressedTrigger: Pressed
     m_SelectedTrigger: Selected
     m_DisabledTrigger: Disabled
-  m_Interactable: 0
+  m_Interactable: 1
   m_TargetGraphic: {fileID: 6385728005352902529}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3626968167800272632}
+        m_TargetAssemblyTypeName: Plant, Assembly-CSharp
+        m_MethodName: toggleUnlockCustomize
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &6248751382522580787
 GameObject:
   m_ObjectHideFlags: 0
